@@ -1,0 +1,2770 @@
+<!doctype html>
+<html lang="vi" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Security Headers & Hardening -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; connect-src 'self' https:; font-src 'self' https: data:;"
+    />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>AURA ONE — Master Flagship Spatial Audio Experience</title>
+    <meta
+      name="description"
+      content="Tai nghe Flagship âm thanh không gian AURA ONE. Hợp kim Magie 238g, màng loa 40mm Beryllium, chip Neural ANC H1 và trải nghiệm 3D tương tác thời gian thực."
+    />
+
+    <!-- OpenGraph & Social Cards -->
+    <meta property="og:title" content="AURA ONE — Sound. Suspended in Space." />
+    <meta
+      property="og:description"
+      content="Tai nghe Flagship âm thanh không gian cao cấp với trải nghiệm tùy biến 3D trực tiếp."
+    />
+    <meta property="og:type" content="website" />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              aura: {
+                black: "#07070a",
+                card: "rgba(13, 14, 20, 0.88)",
+                cyan: "#00f2fe",
+                purple: "#7928ca",
+                titanium: "#d4d4d8",
+                surface: "rgba(255, 255, 255, 0.04)",
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Three.js & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
+
+    <!-- Lenis Smooth Scroll -->
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+    <!-- Centralized Master Data -->
+    <script src="js/data.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="bg-[#07070a] text-slate-100 overflow-x-hidden antialiased">
+    <!-- 3D Canvas Background -->
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- Background Ambient Glow & Typography (Style 42|SD) -->
+    <div
+      class="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none flex items-center justify-center"
+    >
+      <div
+        class="text-[18vw] font-heading font-black text-white/[0.025] tracking-tighter uppercase blur-[1px]"
+      >
+        AURA
+      </div>
+    </div>
+
+    <!-- 360 Inspect Floating Hint -->
+    <div
+      id="inspect-hint"
+      class="fixed top-24 left-1/2 -translate-x-1/2 z-50 glass-panel px-6 py-2.5 rounded-full border border-cyan-400/50 text-cyan-300 text-xs font-mono tracking-wider hidden flex items-center space-x-2 shadow-2xl pointer-events-none animate-pulse"
+    >
+      <i data-lucide="hand" class="w-4 h-4 text-cyan-400"></i>
+      <span
+        >CHẾ ĐỘ 360°: Giữ chuột trái để xoay quanh tai nghe • Lăn chuột để zoom
+        • Bấm Exit 360° khi xong</span
+      >
+    </div>
+
+    <!-- Dynamic 3D Feature Hotspot Pins Overlay (Images 2 & 4 Style) -->
+    <div
+      id="feature-pins-container"
+      class="fixed inset-0 pointer-events-none z-30 overflow-hidden"
+    ></div>
+
+    <!-- Notification Toast -->
+    <div
+      id="toast-notify"
+      class="fixed top-6 right-6 z-50 glass-panel px-5 py-3.5 rounded-2xl border border-emerald-400/40 text-white text-xs font-medium hidden flex items-center space-x-3 shadow-2xl transform transition-all duration-300"
+    >
+      <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+      <span id="toast-message">Thông báo</span>
+    </div>
+
+    <!-- Preloader Screen -->
+    <div
+      id="preloader"
+      class="fixed inset-0 z-50 bg-[#07070a] flex flex-col items-center justify-center transition-opacity duration-700"
+    >
+      <div class="text-center max-w-md px-6">
+        <div
+          class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 mb-6 glow-cyan"
+        >
+          <i data-lucide="headphones" class="w-8 h-8 text-cyan-400"></i>
+        </div>
+        <h2
+          class="font-heading text-3xl font-bold tracking-wider mb-2 text-white"
+        >
+          AURA ONE
+        </h2>
+        <p class="text-sm text-slate-400 mb-8">
+          Spatial Audio Engine & Real-time 3D Simulation
+        </p>
+
+        <div
+          class="w-full bg-slate-800/80 rounded-full h-1.5 overflow-hidden mb-4 p-0.5 border border-slate-700"
+        >
+          <div
+            id="loader-progress"
+            class="bg-gradient-to-r from-cyan-400 to-purple-500 h-full w-0 rounded-full transition-all duration-200"
+          ></div>
+        </div>
+        <div class="flex justify-between text-xs font-mono text-slate-500 mb-8">
+          <span>INITIALIZING SPATIAL SCENE</span>
+          <span id="loader-percent">0%</span>
+        </div>
+
+        <button
+          id="start-btn"
+          class="interactive px-8 py-3.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-semibold text-sm tracking-wide transition-all shadow-lg shadow-cyan-500/25 glow-cyan"
+        >
+          ENTER EXPERIENCE
+        </button>
+      </div>
+    </div>
+
+    <!-- TOP STREAMLINED NAVIGATION (V5 Redesign) -->
+    <header
+      class="fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 py-3.5 flex items-center justify-between border-b border-white/5 bg-[#07070a]/85 backdrop-blur-xl"
+    >
+      <!-- Brand Logo: Spatial Audio Headphone Emblem + AURA ONE -->
+      <a
+        href="#/"
+        class="flex items-center space-x-3 interactive cursor-pointer group"
+      >
+        <div
+          class="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500/20 via-black/60 to-purple-500/20 border border-cyan-400/40 flex items-center justify-center backdrop-blur-md group-hover:border-cyan-400 group-hover:shadow-[0_0_18px_rgba(0,242,254,0.45)] transition-all overflow-hidden p-1.5"
+        >
+          <svg
+            class="w-full h-full transform group-hover:scale-110 transition-transform duration-300"
+            viewBox="0 0 48 48"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient
+                id="headerLogoGrad"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop offset="0%" stop-color="#00f2fe" />
+                <stop offset="50%" stop-color="#38bdf8" />
+                <stop offset="100%" stop-color="#7928ca" />
+              </linearGradient>
+              <filter
+                id="headerLogoGlow"
+                x="-20%"
+                y="-20%"
+                width="140%"
+                height="140%"
+              >
+                <feGaussianBlur stdDeviation="1" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+            <!-- 3D Spatial Audio Orbit Ring -->
+            <circle
+              cx="24"
+              cy="24"
+              r="21"
+              stroke="url(#headerLogoGrad)"
+              stroke-width="1.5"
+              stroke-dasharray="3 3"
+              opacity="0.65"
+              class="animate-[spin_10s_linear_infinite]"
+            />
+            <!-- Headphone Ergonomic Arch -->
+            <path
+              d="M 13 25 C 13 15 17 9 24 9 C 31 9 35 15 35 25"
+              stroke="url(#headerLogoGrad)"
+              stroke-width="3.2"
+              stroke-linecap="round"
+            />
+            <!-- Earcups (Precision Aerospace Aluminum) -->
+            <rect
+              x="10"
+              y="22"
+              width="6"
+              height="13"
+              rx="3"
+              fill="#00f2fe"
+              filter="url(#headerLogoGlow)"
+            />
+            <rect
+              x="32"
+              y="22"
+              width="6"
+              height="13"
+              rx="3"
+              fill="#7928ca"
+              filter="url(#headerLogoGlow)"
+            />
+            <!-- Center Sound Frequency Bars -->
+            <rect
+              x="19.5"
+              y="20"
+              width="2.2"
+              height="10"
+              rx="1.1"
+              fill="#00f2fe"
+            />
+            <rect
+              x="23"
+              y="16"
+              width="2.2"
+              height="16"
+              rx="1.1"
+              fill="#ffffff"
+              filter="url(#headerLogoGlow)"
+            />
+            <rect
+              x="26.5"
+              y="20"
+              width="2.2"
+              height="10"
+              rx="1.1"
+              fill="#7928ca"
+            />
+          </svg>
+          <span
+            class="absolute top-1 right-1 w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f2fe] animate-pulse"
+          ></span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span
+            class="font-heading font-black text-lg tracking-wider text-white"
+            >AURA<span class="text-cyan-400">ONE</span></span
+          >
+          <span
+            class="text-[9px] font-mono text-cyan-300 px-1.5 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/25 tracking-widest uppercase"
+            >3D</span
+          >
+        </div>
+      </a>
+
+      <!-- Center: 5 Primary Nav Links as Interactive Pills -->
+      <nav
+        class="hidden md:flex items-center space-x-1 glass-panel px-3 py-1.5 rounded-full border border-white/10 shadow-inner"
+      >
+        <a href="#/" class="nav-pill" data-route="#/">HOME</a>
+        <a
+          href="#/store"
+          class="nav-pill text-cyan-300 font-bold"
+          data-route="#/store"
+          >SẢN PHẨM</a
+        >
+        <a href="#/anatomy" class="nav-pill" data-route="#/anatomy">ANATOMY</a>
+        <a href="#/spatial-audio" class="nav-pill" data-route="#/spatial-audio"
+          >SPATIAL AUDIO</a
+        >
+        <a href="#/environment" class="nav-pill" data-route="#/environment"
+          >3D ENVIRONMENT</a
+        >
+        <a href="#/explore" class="nav-pill" data-route="#/explore">EXPLORE</a>
+        <button id="nav-intro-btn" class="nav-pill text-cyan-300 font-bold flex items-center space-x-1" title="Giới thiệu dự án AURA ONE 3D">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span>GIỚI THIỆU</span>
+        </button>
+      </nav>
+
+      <!-- Header Text Color Tone Switcher (Tông Màu Chữ Bắt Mắt) -->
+      <div
+        class="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono"
+      >
+        <span class="text-slate-300 mr-1 flex items-center gap-1 font-semibold">
+          <i data-lucide="palette" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span>MÀU CHỮ:</span>
+        </span>
+        <button
+          class="header-theme-dot w-4 h-4 rounded-full bg-cyan-400 border border-white/40 hover:scale-125 transition-transform active-dot shadow-[0_0_8px_#00f2fe]"
+          data-theme="cyan"
+          title="Tông Cyan Băng Luminous (Mặc định)"
+        ></button>
+        <button
+          class="header-theme-dot w-4 h-4 rounded-full bg-amber-400 border border-white/20 hover:scale-125 transition-transform hover:shadow-[0_0_8px_#f59e0b]"
+          data-theme="gold"
+          title="Tông Vàng Champagne Hoàng Gia"
+        ></button>
+        <button
+          class="header-theme-dot w-4 h-4 rounded-full bg-rose-400 border border-white/20 hover:scale-125 transition-transform hover:shadow-[0_0_8px_#f43f5e]"
+          data-theme="rose"
+          title="Tông Hồng Ruby Neon"
+        ></button>
+        <button
+          class="header-theme-dot w-4 h-4 rounded-full bg-emerald-400 border border-white/20 hover:scale-125 transition-transform hover:shadow-[0_0_8px_#10b981]"
+          data-theme="emerald"
+          title="Tông Lục Bảo Matrix"
+        ></button>
+      </div>
+
+      <!-- Right Controls: Audio Synth Equalizer Pill + Telemetry + Cart CTA + Mobile Menu -->
+      <div class="flex items-center space-x-2 sm:space-x-3 interactive">
+        <!-- Real-time Telemetry (Desktop Only) -->
+        <div
+          class="hidden xl:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-black/40 border border-white/10 text-[10px] font-mono text-slate-400"
+        >
+          <span
+            class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"
+          ></span>
+          <span id="header-fps-badge">60 FPS</span>
+          <span class="text-white/20">•</span>
+          <span class="text-cyan-400">SPATIAL READY</span>
+        </div>
+
+        <!-- Spatial Audio Pill with Animated Sound Bars -->
+        <button
+          id="audio-toggle-btn"
+          class="interactive glass-button px-3 sm:px-3.5 py-1.5 rounded-full flex items-center space-x-2 text-xs font-mono text-slate-300 hover:text-cyan-300 transition-all border border-cyan-500/20"
+          title="Bật/Tắt Âm thanh Không gian 8D"
+        >
+          <div class="sound-wave-bars" id="sound-bars-indicator">
+            <span class="sound-bar paused"></span>
+            <span class="sound-bar paused"></span>
+            <span class="sound-bar paused"></span>
+            <span class="sound-bar paused"></span>
+          </div>
+          <i
+            data-lucide="volume-2"
+            id="audio-icon"
+            class="w-3.5 h-3.5 text-slate-400"
+          ></i>
+          <span class="text-[11px] font-medium" id="audio-text">SOUND OFF</span>
+        </button>
+
+        <!-- Cart Button with Price -->
+        <!-- Wishlist Button with Counter -->
+        <button
+          id="header-wishlist-btn"
+          class="interactive glass-button px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full flex items-center space-x-1.5 text-xs font-mono text-slate-300 hover:text-rose-400 border border-white/10 hover:border-rose-400/40 transition-all relative group"
+          title="Danh sách yêu thích"
+        >
+          <i
+            data-lucide="heart"
+            class="w-3.5 h-3.5 text-rose-400 group-hover:scale-110 transition-transform"
+          ></i>
+          <span class="hidden xl:inline font-semibold text-[11px]"
+            >YÊU THÍCH</span
+          >
+          <span
+            id="header-wishlist-count"
+            class="w-4 h-4 rounded-full bg-rose-500/80 text-white text-[9px] flex items-center justify-center font-mono font-bold"
+            >0</span
+          >
+        </button>
+
+        <button
+          id="header-cart-btn"
+          class="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-cyan-400 hover:bg-cyan-300 text-black font-semibold text-xs tracking-wider uppercase transition-all shadow-md shadow-cyan-400/25 flex items-center space-x-2"
+        >
+          <i data-lucide="shopping-bag" class="w-3.5 h-3.5 fill-current"></i>
+          <span class="hidden sm:inline font-bold">GIỎ HÀNG</span>
+          <span class="sm:hidden font-bold">GIỎ</span>
+          <span
+            id="header-cart-count"
+            class="w-4 h-4 rounded-full bg-black text-white text-[10px] flex items-center justify-center font-mono font-bold"
+            >1</span
+          >
+        </button>
+
+        <!-- User Account / Sanctuary Portal Entry -->
+        <button
+          id="header-concierge-btn"
+          class="interactive glass-button px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full flex items-center space-x-1.5 text-xs font-mono text-emerald-300 hover:text-white border border-emerald-400/40 hover:border-emerald-400 transition-all shadow-md shadow-emerald-400/10"
+          title="Trò chuyện cùng Chuyên Gia Âm Học AI"
+        >
+          <span
+            class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"
+          ></span>
+          <i data-lucide="bot" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span class="hidden lg:inline font-bold">CHUYÊN GIA AI</span>
+        </button>
+        <div id="header-auth-container" class="relative">
+          <a
+            href="#/login"
+            id="header-login-btn"
+            class="interactive glass-button px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full flex items-center space-x-1.5 text-xs font-mono text-cyan-300 hover:text-white border border-cyan-400/30 hover:border-cyan-400 transition-all"
+          >
+            <i data-lucide="user" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span class="hidden sm:inline font-semibold">ĐĂNG NHẬP</span>
+          </a>
+        </div>
+
+        <!-- Mobile Menu Toggle Button -->
+        <button
+          id="mobile-menu-btn"
+          class="md:hidden glass-button p-2 rounded-xl text-slate-300 hover:text-cyan-400"
+        >
+          <i data-lucide="menu" id="mobile-menu-icon" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Mobile Drawer Menu Overlay -->
+    <div
+      id="mobile-menu-drawer"
+      class="fixed inset-0 z-30 bg-[#07070a]/95 backdrop-blur-2xl transform -translate-y-full transition-transform duration-300 md:hidden flex flex-col pt-24 px-6 pb-8 border-b border-white/10 overflow-y-auto"
+    >
+      <div
+        class="space-y-4 flex-1 flex flex-col justify-center max-w-sm mx-auto w-full"
+      >
+        <a
+          href="#/"
+          class="mobile-nav-link text-xl font-heading font-bold text-white hover:text-cyan-400 py-3 border-b border-white/5 flex items-center justify-between"
+        >
+          <span>01 / HOME</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-cyan-400"></i>
+        </a>
+        <button
+          id="mobile-concierge-btn"
+          class="w-full my-2 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-400/40 text-emerald-300 hover:text-white flex items-center justify-between text-sm font-bold shadow-lg shadow-emerald-500/10 transition-all"
+        >
+          <div class="flex items-center space-x-2.5">
+            <span
+              class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"
+            ></span>
+            <span>CHUYÊN GIA ÂM HỌC AURA AI</span>
+          </div>
+          <i data-lucide="bot" class="w-5 h-5 text-cyan-400"></i>
+        </button>
+        <a
+          href="#/store"
+          class="mobile-nav-link text-xl font-heading font-bold text-cyan-300 hover:text-white py-3 border-b border-white/5 flex items-center justify-between"
+        >
+          <span>02 / CỬA HÀNG SẢN PHẨM</span>
+          <i data-lucide="shopping-bag" class="w-4 h-4 text-cyan-400"></i>
+        </a>
+        <a
+          href="#/wishlist"
+          class="mobile-nav-link text-xl font-heading font-bold text-rose-300 hover:text-white py-3 border-b border-white/5 flex items-center justify-between"
+        >
+          <span>YÊU THÍCH (WISHLIST)</span>
+          <i data-lucide="heart" class="w-4 h-4 text-rose-400"></i>
+        </a>
+        <a
+          href="#/warranty"
+          class="mobile-nav-link text-xl font-heading font-bold text-emerald-300 hover:text-white py-3 border-b border-white/5 flex items-center justify-between"
+        >
+          <span>TRA CỨU BẢO HÀNH CHÍNH HÃNG</span>
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+        </a>
+        <a
+          href="#/anatomy"
+          class="mobile-nav-link text-xl font-heading font-bold text-white hover:text-cyan-400 py-3 border-b border-white/5 flex items-center justify-between"
+        >
+          <span>02 / ANATOMY</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-cyan-400"></i>
+        </a>
+        <a
+          href="#/spatial-audio"
+          class="mobile-nav-link text-xl font-heading font-bold text-white hover:text-cyan-400 py-3 border-b border-white/5 flex items-center justify-between"
+        >
+          <span>03 / SPATIAL AUDIO</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-cyan-400"></i>
+        </a>
+        <a
+          href="#/environment"
+          class="mobile-nav-link text-xl font-heading font-bold text-white hover:text-cyan-400 py-3 border-b border-white/5 flex items-center justify-between"
+        >
+          <span>04 / 3D ENVIRONMENT</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-cyan-400"></i>
+        </a>
+        <a
+          href="#/explore"
+          class="mobile-nav-link text-xl font-heading font-bold text-white hover:text-cyan-400 py-3 border-b border-white/5 flex items-center justify-between"
+        >
+          <span>05 / EXPLORE</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-cyan-400"></i>
+        </a>
+        <a
+          href="#/dashboard"
+          class="mobile-nav-link text-xl font-heading font-bold text-cyan-300 hover:text-cyan-400 py-3 border-b border-white/5 flex items-center justify-between"
+        >
+          <span>06 / KHÔNG GIAN CÁ NHÂN</span>
+          <i data-lucide="sparkles" class="w-4 h-4 text-cyan-400"></i>
+        </a>
+        <a
+          href="#/cart"
+          class="mobile-nav-link text-xl font-heading font-bold text-white hover:text-cyan-400 py-3 border-b border-white/5 flex items-center justify-between"
+        >
+          <span>07 / GIỎ HÀNG & ĐƠN HÀNG</span>
+          <i data-lucide="shopping-bag" class="w-4 h-4 text-cyan-400"></i>
+        </a>
+      </div>
+
+      <!-- Quick Shortcuts Grid in Drawer -->
+      <div class="mt-6 pt-4 border-t border-white/10 max-w-sm mx-auto w-full">
+        <div
+          class="text-[10px] font-mono text-slate-400 uppercase tracking-widest mb-2 flex items-center justify-between"
+        >
+          <span>TÔNG MÀU CHỮ:</span>
+          <span id="mobile-active-theme-name" class="text-cyan-400 font-bold"
+            >CYBER CYAN</span
+          >
+        </div>
+        <div class="grid grid-cols-4 gap-2 mb-6">
+          <button
+            class="mobile-theme-btn p-2 rounded-xl bg-white/5 border border-cyan-400/50 flex flex-col items-center gap-1 text-[10px] font-mono text-white"
+            data-theme="cyan"
+          >
+            <span
+              class="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f2fe]"
+            ></span>
+            <span>Cyan</span>
+          </button>
+          <button
+            class="mobile-theme-btn p-2 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-1 text-[10px] font-mono text-slate-300"
+            data-theme="gold"
+          >
+            <span
+              class="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b]"
+            ></span>
+            <span>Gold</span>
+          </button>
+          <button
+            class="mobile-theme-btn p-2 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-1 text-[10px] font-mono text-slate-300"
+            data-theme="rose"
+          >
+            <span
+              class="w-3 h-3 rounded-full bg-rose-400 shadow-[0_0_8px_#f43f5e]"
+            ></span>
+            <span>Rose</span>
+          </button>
+          <button
+            class="mobile-theme-btn p-2 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-1 text-[10px] font-mono text-slate-300"
+            data-theme="emerald"
+          >
+            <span
+              class="w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_8px_#10b981]"
+            ></span>
+            <span>Matrix</span>
+          </button>
+        </div>
+
+        <div
+          class="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-3"
+        >
+          TÙY CHỌN BỔ SUNG:
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs font-mono text-slate-400">
+          <a
+            href="#/studio"
+            class="mobile-nav-link p-2 rounded-lg bg-white/5 hover:text-cyan-300"
+            >Color Studio</a
+          >
+          <a
+            href="#/specs"
+            class="mobile-nav-link p-2 rounded-lg bg-white/5 hover:text-cyan-300"
+            >Thông số kỹ thuật</a
+          >
+          <a
+            href="#/compare"
+            class="mobile-nav-link p-2 rounded-lg bg-white/5 hover:text-cyan-300"
+            >So sánh đối thủ</a
+          >
+          <a
+            href="#/order-tracking"
+            class="mobile-nav-link p-2 rounded-lg bg-white/5 hover:text-cyan-300"
+            >Tra cứu đơn hàng</a
+          >
+          <a
+            href="#/digital-warranty"
+            class="mobile-nav-link p-2 rounded-lg bg-white/5 hover:text-cyan-300"
+            >Bảo hành số</a
+          >
+          <a
+            href="#/about"
+            class="mobile-nav-link p-2 rounded-lg bg-white/5 hover:text-cyan-300"
+            >About AURA</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK FLOATING HUD CONTROLS (Bottom-Left) -->
+    <div
+      class="fixed bottom-6 left-6 z-30 flex flex-wrap items-center gap-2 pointer-events-auto"
+    >
+      <button
+        id="inspect-360-btn"
+        class="interactive glass-button px-4 py-2.5 rounded-full text-xs font-medium flex items-center space-x-2 text-slate-200 hover:text-cyan-300 shadow-lg"
+      >
+        <i data-lucide="orbit" class="w-4 h-4 text-cyan-400"></i>
+        <span id="inspect-360-text">Inspect 360°</span>
+      </button>
+      <button
+        id="ar-view-btn"
+        class="interactive glass-button px-4 py-2.5 rounded-full text-xs font-medium flex items-center space-x-2 text-slate-200 hover:text-purple-300 shadow-lg"
+      >
+        <i data-lucide="view" class="w-4 h-4 text-purple-400"></i>
+        <span>View in AR</span>
+      </button>
+      <button
+        id="reduce-motion-btn"
+        class="interactive glass-button px-3.5 py-2.5 rounded-full text-xs font-medium flex items-center space-x-1.5 text-slate-300 hover:text-white"
+        title="Giảm chuyển động xoay 3D"
+      >
+        <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline" id="reduce-motion-text"
+          >Comfort: OFF</span
+        >
+      </button>
+    </div>
+
+    <!-- FLOATING COMFORT AUDIO CONTROLS (Bottom-Right) -->
+    <div
+      class="fixed bottom-20 right-6 z-30 pointer-events-auto flex flex-col items-end space-y-2"
+    >
+      <button
+        id="floating-comfort-btn"
+        class="interactive glass-button px-4 py-2.5 rounded-full flex items-center space-x-2 text-xs text-white hover:text-cyan-300 shadow-2xl border border-cyan-400/40 glow-box-dynamic transition-all group"
+        title="Mở Không Gian Âm Thanh Thư Giãn"
+      >
+        <span
+          class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#00f2fe]"
+        ></span>
+        <span class="font-semibold tracking-wide">Âm Thanh Thư Giãn</span>
+        <span
+          class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-cyan-400/20 text-cyan-300"
+          >5 CHẾ ĐỘ</span
+        >
+        <i
+          data-lucide="music"
+          class="w-4 h-4 text-cyan-400 group-hover:rotate-12 transition-transform"
+        ></i>
+      </button>
+      <button
+        id="concierge-btn"
+        class="interactive glass-button px-4 py-2.5 rounded-full flex items-center space-x-2.5 text-xs text-white hover:text-cyan-300 shadow-2xl border border-emerald-400/50 glow-box-dynamic transition-all group bg-emerald-950/40 hover:bg-emerald-900/50"
+        title="Mở Chuyên Gia Âm Học AURA AI"
+      >
+        <span class="relative flex h-2.5 w-2.5">
+          <span
+            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
+          ></span>
+          <span
+            class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"
+          ></span>
+        </span>
+        <span
+          class="font-bold tracking-wide text-emerald-300 group-hover:text-white"
+          >Chuyên Gia AURA AI</span
+        >
+        <span
+          class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-cyan-400/20 text-cyan-300 font-bold"
+          >AGENT 2.0</span
+        >
+        <i
+          data-lucide="sparkles"
+          class="w-3.5 h-3.5 text-cyan-400 group-hover:rotate-12 transition-transform"
+        ></i>
+      </button>
+    </div>
+
+    <!-- DYNAMIC VIEW CONTAINER (Holds active page view) -->
+    <main id="main-view-container" class="relative z-10 pt-24 min-h-screen">
+      <!-- Active page will be injected dynamically by client-side router -->
+    </main>
+
+    <!-- PERSISTENT FLOATING AUDIO PLAYER DOCK -->
+    <div
+      id="aura-audio-dock"
+      class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-xl w-[94%] sm:w-auto glass-panel px-4 py-2 rounded-full border border-cyan-400/30 shadow-[0_10px_35px_rgba(0,0,0,0.85)] backdrop-blur-2xl flex items-center justify-between gap-3 text-white transition-all duration-300"
+    >
+      <!-- Track Info & Visualizer Trigger -->
+      <div
+        class="flex items-center space-x-2.5 min-w-0 cursor-pointer group"
+        id="audio-dock-track-info"
+        title="Bấm để mở Kho Nhạc & Âm Thanh"
+      >
+        <div
+          class="w-8 h-8 rounded-full bg-cyan-400/10 border border-cyan-400/40 flex items-center justify-center text-cyan-400 flex-shrink-0 relative overflow-hidden group-hover:scale-105 transition-transform"
+        >
+          <i
+            data-lucide="headphones"
+            id="audio-dock-disc-icon"
+            class="w-4 h-4 text-cyan-300"
+          ></i>
+        </div>
+        <div
+          class="hidden sm:flex items-end space-x-0.5 h-3.5 px-1 py-0.5"
+          id="dock-mini-wave"
+          title="Âm thanh 8D đang phát"
+        >
+          <span
+            class="w-0.5 bg-cyan-400 rounded-full h-1.5 sound-bar paused"
+          ></span>
+          <span
+            class="w-0.5 bg-cyan-300 rounded-full h-3.5 sound-bar paused"
+          ></span>
+          <span
+            class="w-0.5 bg-purple-400 rounded-full h-2 sound-bar paused"
+          ></span>
+          <span
+            class="w-0.5 bg-emerald-400 rounded-full h-2.5 sound-bar paused"
+          ></span>
+        </div>
+        <div class="min-w-0 pr-1">
+          <div
+            class="text-[11px] font-bold text-white truncate max-w-[140px] sm:max-w-[180px]"
+            id="audio-dock-title"
+          >
+            Liêu Xiêu (Can You Stay)
+          </div>
+          <div
+            class="text-[9px] font-mono text-cyan-400 flex items-center gap-1"
+          >
+            <span
+              class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"
+            ></span>
+            <span id="audio-dock-sub">8D SPATIAL MASTER</span>
+            <span class="text-white/20">•</span>
+            <span id="audio-dock-time" class="text-slate-400">0:00 / 2:53</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Play / Pause Button -->
+      <button
+        id="audio-dock-play-btn"
+        class="w-8 h-8 rounded-full bg-cyan-400 hover:bg-cyan-300 text-black flex items-center justify-center flex-shrink-0 transition-transform active:scale-95 shadow-md shadow-cyan-400/25"
+        title="Phát / Tạm dừng"
+      >
+        <i
+          data-lucide="play"
+          id="audio-dock-play-icon"
+          class="w-4 h-4 fill-current"
+        ></i>
+      </button>
+
+      <!-- Volume Control Slider -->
+      <div
+        class="hidden sm:flex items-center space-x-1.5 flex-shrink-0 text-slate-300"
+      >
+        <button
+          id="audio-dock-mute-btn"
+          class="text-slate-400 hover:text-cyan-400 transition-colors"
+          title="Bật/Tắt tiếng"
+        >
+          <i
+            data-lucide="volume-2"
+            id="audio-dock-vol-icon"
+            class="w-3.5 h-3.5"
+          ></i>
+        </button>
+        <input
+          type="range"
+          id="audio-dock-volume"
+          min="0"
+          max="100"
+          value="70"
+          class="w-16 h-1 accent-cyan-400 cursor-pointer"
+          title="Âm lượng"
+        />
+        <span
+          id="audio-dock-vol-text"
+          class="text-[9px] font-mono text-cyan-400 w-7"
+          >70%</span
+        >
+      </div>
+
+      <!-- Quick Sound Suite / EQ Button -->
+      <button
+        id="audio-dock-suite-btn"
+        class="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-cyan-300 text-[10px] font-mono flex items-center space-x-1 flex-shrink-0 border border-white/10 transition-colors"
+        title="Mở danh sách bài hát & âm thanh thư giãn"
+      >
+        <i data-lucide="music" class="w-3 h-3 text-cyan-400"></i>
+        <span class="hidden md:inline font-bold">KHO NHẠC</span>
+      </button>
+    </div>
+
+    <!-- STICKY BOTTOM BUY BAR -->
+    <div
+      id="sticky-buy-bar"
+      class="fixed bottom-0 left-0 right-0 z-40 bg-[#0d0e14]/90 backdrop-blur-xl border-t border-white/10 px-6 py-3.5 transform translate-y-full transition-transform duration-500 flex items-center justify-between"
+    >
+      <div class="flex items-center space-x-3">
+        <span
+          class="w-3.5 h-3.5 rounded-full bg-[#121316] border border-white/30"
+          id="sticky-color-dot"
+        ></span>
+        <div>
+          <div class="text-xs font-bold text-white">AURA ONE Flagship</div>
+          <div
+            class="text-[10px] text-cyan-400 font-mono"
+            id="sticky-selected-color"
+          >
+            Obsidian Black • Free Laser Engraving
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="text-right hidden sm:block">
+          <div class="text-sm font-bold text-white" id="sticky-price-display">
+            Từ $399.00
+          </div>
+          <div class="text-[10px] text-emerald-400 font-mono">
+            In Stock • Ships in 24h
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button
+            id="sticky-custom-btn"
+            class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-bold transition-all border border-white/15"
+          >
+            TÙY BIẾN 3D
+          </button>
+          <a
+            href="#/checkout"
+            class="px-5 py-2 rounded-full bg-cyan-400 hover:bg-cyan-300 text-black font-mono text-xs font-black uppercase transition-all shadow-md shadow-cyan-400/25"
+          >
+            MUA NGAY
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK CHECKOUT DRAWER (SLIDE-OVER) -->
+    <div
+      id="checkout-drawer"
+      class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-[#0d0e14] border-l border-white/10 shadow-2xl p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-500 ease-out overflow-y-auto"
+    >
+      <div>
+        <div
+          class="flex items-center justify-between pb-4 border-b border-white/10"
+        >
+          <div class="flex items-center space-x-2.5">
+            <div
+              class="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center"
+            >
+              <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+            </div>
+            <h3 class="font-heading font-bold text-lg text-white">
+              Giỏ Hàng AURA ONE
+            </h3>
+          </div>
+          <button
+            id="close-drawer-btn"
+            class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-white transition-all"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Dynamic Items Container -->
+        <div class="py-4 space-y-4">
+          <!-- Scrollable Items List -->
+          <div
+            id="drawer-items-list"
+            class="space-y-3 max-h-[42vh] overflow-y-auto pr-1"
+          >
+            <!-- Populated dynamically by updateDrawerCartUI() -->
+          </div>
+
+          <!-- Promo Code Input -->
+          <div class="flex space-x-2 pt-2 border-t border-white/10">
+            <input
+              type="text"
+              id="promo-input"
+              placeholder="Mã giảm giá (Thử: AURA50)"
+              class="flex-1 px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 focus:border-cyan-400 focus:outline-none text-xs text-white uppercase font-mono"
+            />
+            <button
+              id="apply-promo-btn"
+              class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-cyan-300 transition-all font-mono"
+            >
+              ÁP DỤNG
+            </button>
+          </div>
+
+          <!-- Price Breakdown -->
+          <div class="p-4 rounded-2xl bg-white/5 space-y-2 text-xs font-mono">
+            <div class="flex justify-between text-slate-400">
+              <span>Tạm tính</span>
+              <span class="text-white font-bold" id="subtotal-val">$0.00</span>
+            </div>
+            <div class="flex justify-between text-slate-400">
+              <span>Khắc laser 3D</span>
+              <span class="text-emerald-400">MIỄN PHÍ</span>
+            </div>
+            <div
+              class="flex justify-between text-slate-400"
+              id="discount-row"
+              style="display: none"
+            >
+              <span>Ưu đãi voucher</span>
+              <span class="text-cyan-400 font-bold" id="discount-val"
+                >-$50.00</span
+              >
+            </div>
+            <div class="flex justify-between text-slate-400">
+              <span>Vận chuyển hỏa tốc VIP</span>
+              <span class="text-emerald-400">MIỄN PHÍ</span>
+            </div>
+            <div
+              class="flex justify-between text-base font-bold text-white pt-2 border-t border-white/10"
+            >
+              <span>Tổng thanh toán</span>
+              <span class="text-cyan-400" id="total-val">$0.00</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="space-y-2 pt-1">
+            <a
+              href="#/checkout"
+              id="drawer-to-checkout-btn"
+              class="w-full py-3.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-extrabold text-xs tracking-wider uppercase transition-all shadow-lg shadow-cyan-400/25 flex items-center justify-center space-x-2"
+            >
+              <span>TIẾN HÀNH ĐẶT HÀNG</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+            <a
+              href="#/cart"
+              id="drawer-to-cart-page-btn"
+              class="w-full py-2.5 text-center text-xs font-mono text-cyan-300 hover:text-white hover:underline flex items-center justify-center space-x-1"
+            >
+              <span>Xem trang giỏ hàng chi tiết</span>
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="text-center text-[11px] text-slate-500 pt-4 border-t border-white/10 font-mono"
+      >
+        <i
+          data-lucide="lock"
+          class="w-3.5 h-3.5 inline mr-1 text-emerald-400"
+        ></i>
+        Mã hóa bảo mật SSL 256-bit • Bảo hành VIP 3 năm 1 đổi 1.
+      </div>
+    </div>
+
+    <!-- CONCIERGE CHAT MODAL (AURA NEURAL AGENT 2.0) -->
+    <div
+      id="concierge-modal"
+      class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden flex items-center justify-center p-3 sm:p-6 transition-all duration-300"
+    >
+      <div
+        id="concierge-container"
+        class="max-w-3xl w-full glass-panel rounded-3xl border border-cyan-500/30 relative shadow-[0_20px_60px_rgba(0,0,0,0.9)] flex flex-col h-[680px] max-h-[92vh] overflow-hidden bg-[#090b14]/95 backdrop-blur-2xl transition-all duration-300"
+      >
+        <!-- Modal Header -->
+        <div
+          class="px-5 py-4 border-b border-white/10 flex items-center justify-between bg-white/[0.02]"
+        >
+          <div class="flex items-center space-x-3.5">
+            <!-- Animated Neural Avatar -->
+            <div
+              class="relative w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-500/20 via-black to-emerald-500/20 border border-cyan-400/50 flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(0,242,254,0.3)]"
+            >
+              <i data-lucide="bot" class="w-6 h-6 text-cyan-400"></i>
+              <span
+                class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#090b14] flex items-center justify-center"
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full bg-white animate-ping"
+                ></span>
+              </span>
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h3
+                  class="font-heading font-bold text-base sm:text-lg text-white"
+                >
+                  Chuyên Gia AURA AI
+                </h3>
+                <span
+                  class="text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-400/10 text-cyan-300 border border-cyan-400/30 uppercase tracking-wider font-semibold"
+                  >NEURAL AGENT 2.0</span
+                >
+              </div>
+              <div
+                class="flex items-center space-x-2 text-[11px] text-slate-400"
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"
+                ></span>
+                <span
+                  >Trực tuyến • Tư vấn âm học & Điều khiển 3D tương tác</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Header Actions -->
+          <div class="flex items-center space-x-2">
+            <!-- Reset Conversation Button -->
+            <button
+              id="concierge-reset-btn"
+              class="interactive p-2 rounded-xl text-slate-400 hover:text-cyan-300 hover:bg-white/5 transition-all"
+              title="Làm mới cuộc trò chuyện"
+            >
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            </button>
+            <!-- Expand/Collapse Fullscreen Button -->
+            <button
+              id="concierge-expand-btn"
+              class="interactive p-2 rounded-xl text-slate-400 hover:text-cyan-300 hover:bg-white/5 transition-all hidden sm:inline-flex"
+              title="Phóng to / Thu nhỏ"
+            >
+              <i
+                data-lucide="maximize-2"
+                id="concierge-expand-icon"
+                class="w-4 h-4"
+              ></i>
+            </button>
+            <!-- Close Button -->
+            <button
+              id="close-concierge-btn"
+              class="interactive p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+            >
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Action Pills Row (Scrollable Bar) -->
+        <div
+          class="px-5 py-2.5 bg-black/40 border-b border-white/5 flex items-center space-x-2 overflow-x-auto no-scrollbar text-xs"
+        >
+          <span
+            class="text-[10px] font-mono text-slate-400 whitespace-nowrap uppercase tracking-wider flex items-center space-x-1 mr-1"
+          >
+            <i data-lucide="sparkles" class="w-3 h-3 text-cyan-400"></i>
+            <span>Gợi ý:</span>
+          </span>
+          <button
+            class="concierge-action-chip px-3 py-1.5 rounded-full bg-white/5 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-300 border border-white/10 hover:border-cyan-400/40 whitespace-nowrap transition-all flex items-center space-x-1.5"
+            data-prompt="Tư vấn chọn tai nghe theo thể loại nhạc tôi hay nghe"
+          >
+            <span>🎧</span>
+            <span>Tư vấn gu nhạc</span>
+          </button>
+          <button
+            class="concierge-action-chip px-3 py-1.5 rounded-full bg-white/5 hover:bg-amber-500/20 text-slate-300 hover:text-amber-300 border border-white/10 hover:border-amber-400/40 whitespace-nowrap transition-all flex items-center space-x-1.5"
+            data-prompt="Đổi màu tai nghe 3D sang Vàng 24K Royal Gold"
+          >
+            <span>👑</span>
+            <span>Đổi màu 3D Vàng 24K</span>
+          </button>
+          <button
+            class="concierge-action-chip px-3 py-1.5 rounded-full bg-white/5 hover:bg-purple-500/20 text-slate-300 hover:text-purple-300 border border-white/10 hover:border-purple-400/40 whitespace-nowrap transition-all flex items-center space-x-1.5"
+            data-prompt="Bóc tách màng loa 3D và giải thích công nghệ Beryllium"
+          >
+            <span>🔬</span>
+            <span>Bóc tách màng loa</span>
+          </button>
+          <button
+            class="concierge-action-chip px-3 py-1.5 rounded-full bg-white/5 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-300 border border-white/10 hover:border-cyan-400/40 whitespace-nowrap transition-all flex items-center space-x-1.5"
+            data-prompt="Bật phát thử bài nhạc Liêu Xiêu chất lượng cao 8D"
+          >
+            <span>🎵</span>
+            <span>Bật nhạc Liêu Xiêu 8D</span>
+          </button>
+          <button
+            class="concierge-action-chip px-3 py-1.5 rounded-full bg-white/5 hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-300 border border-white/10 hover:border-emerald-400/40 whitespace-nowrap transition-all flex items-center space-x-1.5"
+            data-prompt="Tôi muốn nhận mã giảm giá $50 cho đơn hàng"
+          >
+            <span>🎁</span>
+            <span>Nhận mã giảm $50</span>
+          </button>
+          <button
+            class="concierge-action-chip px-3 py-1.5 rounded-full bg-white/5 hover:bg-sky-500/20 text-slate-300 hover:text-sky-300 border border-white/10 hover:border-sky-400/40 whitespace-nowrap transition-all flex items-center space-x-1.5"
+            data-prompt="Kiểm tra bảo hành chính hãng và thời gian giao hàng"
+          >
+            <span>🔍</span>
+            <span>Tra cứu bảo hành</span>
+          </button>
+          <button
+            class="concierge-action-chip px-3 py-1.5 rounded-full bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border border-white/10 hover:border-rose-400/40 whitespace-nowrap transition-all flex items-center space-x-1.5"
+            data-prompt="Tai nghe này cắm điện thoại có cần mua thêm DAC/Amp rời không?"
+          >
+            <span>⚡</span>
+            <span>Cần DAC rời không?</span>
+          </button>
+          <button
+            class="concierge-action-chip px-3 py-1.5 rounded-full bg-white/5 hover:bg-orange-500/20 text-slate-300 hover:text-orange-300 border border-white/10 hover:border-orange-400/40 whitespace-nowrap transition-all flex items-center space-x-1.5"
+            data-prompt="Khắc tên laser 3D có tính thêm phí không?"
+          >
+            <span>🛠️</span>
+            <span>Phí khắc laser?</span>
+          </button>
+        </div>
+
+        <!-- Messages History Container -->
+        <div
+          class="p-4 sm:p-5 space-y-4 flex-1 overflow-y-auto custom-chat-scrollbar"
+          id="concierge-messages"
+        >
+          <!-- Messages dynamically rendered here -->
+        </div>
+
+        <!-- Typing Indicator -->
+        <div
+          id="concierge-typing-indicator"
+          class="hidden px-5 py-2 flex items-center space-x-2 text-xs text-slate-400 bg-white/[0.02]"
+        >
+          <div class="flex space-x-1">
+            <span
+              class="w-2 h-2 rounded-full bg-cyan-400 animate-bounce"
+              style="animation-delay: 0s"
+            ></span>
+            <span
+              class="w-2 h-2 rounded-full bg-cyan-400 animate-bounce"
+              style="animation-delay: 0.15s"
+            ></span>
+            <span
+              class="w-2 h-2 rounded-full bg-cyan-400 animate-bounce"
+              style="animation-delay: 0.3s"
+            ></span>
+          </div>
+          <span class="text-[11px] font-mono text-cyan-300"
+            >Chuyên gia AURA AI đang phân tích dữ liệu âm học...</span
+          >
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-3.5 sm:p-4 bg-black/60 border-t border-white/10">
+          <form
+            id="concierge-form"
+            class="flex items-center space-x-2"
+            onsubmit="return false;"
+          >
+            <div class="relative flex-1">
+              <input
+                type="text"
+                id="concierge-user-input"
+                autocomplete="off"
+                placeholder="Nhập câu hỏi (vd: tư vấn bass mạnh, đổi màu vàng 24K, bóc tách màng loa, mã giảm giá...)..."
+                class="w-full pl-4 pr-10 py-3 rounded-2xl bg-white/5 border border-white/15 focus:border-cyan-400 focus:bg-white/10 focus:outline-none text-xs sm:text-sm text-white placeholder-slate-500 transition-all shadow-inner"
+              />
+              <button
+                type="button"
+                id="concierge-clear-input"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 hidden"
+              >
+                <i data-lucide="x-circle" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <button
+              type="submit"
+              id="concierge-send-btn"
+              class="px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black font-bold flex items-center justify-center space-x-2 shadow-lg shadow-cyan-400/25 transition-all transform active:scale-95 flex-shrink-0"
+            >
+              <span class="hidden sm:inline text-xs tracking-wider uppercase"
+                >Gửi</span
+              >
+              <i data-lucide="send" class="w-4 h-4"></i>
+            </button>
+          </form>
+          <div
+            class="flex items-center justify-between mt-2 px-1 text-[10px] text-slate-500 font-mono"
+          >
+            <span
+              >Hỗ trợ điều khiển 3D trực tiếp & tư vấn chuẩn Audiophile</span
+            >
+            <span>AURA Neural Engine v2.4</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AR VIEW MODAL (QR CODE) -->
+    <div
+      id="ar-modal"
+      class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-6"
+    >
+      <div
+        class="max-w-sm w-full glass-panel p-8 rounded-3xl border border-white/20 text-center relative shadow-2xl"
+      >
+        <button
+          id="close-ar-modal-btn"
+          class="absolute top-4 right-4 text-slate-400 hover:text-white"
+        >
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <div
+          class="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto mb-4 text-purple-400"
+        >
+          <i data-lucide="scan" class="w-8 h-8"></i>
+        </div>
+        <h3 class="font-heading font-bold text-xl text-white mb-2">
+          Trải Nghiệm AR Trên Bàn
+        </h3>
+        <p class="text-xs text-slate-300 mb-6">
+          Quét mã QR bằng camera điện thoại để đặt tai nghe AURA ONE 3D tỉ lệ
+          1:1 ngay trong không gian làm việc của bạn.
+        </p>
+
+        <div
+          class="w-48 h-48 bg-white p-3 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg"
+        >
+          <img
+            src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://aura-one.audio/ar"
+            alt="AR QR Code"
+            class="w-full h-full"
+          />
+        </div>
+        <div class="text-[10px] font-mono text-cyan-400">
+          Hỗ trợ iOS Safari & Android Chrome (WebXR)
+        </div>
+      </div>
+    </div>
+
+    <!-- CURATED ART LIGHTBOX MODAL (Full Resolution Inspection) -->
+    <div
+      id="art-lightbox-modal"
+      class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 sm:p-8 transition-opacity duration-300"
+    >
+      <div
+        class="max-w-5xl w-full glass-panel rounded-3xl border border-white/20 relative shadow-2xl overflow-hidden flex flex-col lg:flex-row max-h-[90vh]"
+      >
+        <button
+          id="close-lightbox-btn"
+          class="interactive absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center hover:bg-white/20 transition-all"
+        >
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Image Area -->
+        <div
+          class="lg:w-3/5 bg-black/80 flex items-center justify-center p-4 overflow-hidden relative"
+        >
+          <img
+            id="lightbox-img"
+            src=""
+            alt="Art inspection"
+            class="max-h-[65vh] lg:max-h-[80vh] w-auto max-w-full object-contain rounded-xl shadow-2xl"
+          />
+          <span
+            id="lightbox-tag"
+            class="absolute bottom-4 left-4 px-3 py-1 rounded-full bg-black/80 border border-white/20 text-[10px] font-mono text-amber-400"
+          ></span>
+        </div>
+
+        <!-- Curatorial Data & Actions Area -->
+        <div
+          class="lg:w-2/5 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto border-t lg:border-t-0 lg:border-l border-white/10"
+        >
+          <div>
+            <div
+              class="text-[10px] font-mono text-slate-400 uppercase tracking-widest mb-1"
+              id="lightbox-cat"
+            >
+              CURATED EXHIBITION
+            </div>
+            <h2
+              id="lightbox-title"
+              class="font-display text-2xl sm:text-3xl text-white mb-2 leading-tight"
+            ></h2>
+            <div
+              id="lightbox-sub"
+              class="text-xs font-mono text-cyan-300 mb-4"
+            ></div>
+
+            <p
+              id="lightbox-desc"
+              class="text-xs text-slate-300 leading-relaxed mb-6"
+            ></p>
+
+            <div
+              class="space-y-3 pt-4 border-t border-white/10 text-[11px] font-mono"
+            >
+              <div class="flex justify-between">
+                <span class="text-slate-500">MEDIUM / TECHNIQUE</span>
+                <span
+                  id="lightbox-medium"
+                  class="text-slate-200 text-right max-w-[200px]"
+                ></span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">ARTIST / STUDIO</span>
+                <span id="lightbox-artist" class="text-slate-200"></span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">YEAR / DIMENSIONS</span>
+                <span id="lightbox-year" class="text-slate-200"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-6 mt-6 border-t border-white/10 flex flex-col gap-2.5">
+            <button
+              id="lightbox-apply-theme-btn"
+              class="interactive w-full py-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-semibold text-xs tracking-wider uppercase transition-all shadow-lg flex items-center justify-center space-x-2"
+            >
+              <i data-lucide="palette" class="w-4 h-4"></i>
+              <span>ÁP DỤNG TÔNG MÀU VÀO 3D</span>
+            </button>
+            <a
+              href="#/anatomy"
+              class="interactive w-full py-3 rounded-full glass-button text-center text-xs text-white hover:bg-white/10 transition-all flex items-center justify-center space-x-2"
+            >
+              <i data-lucide="layers" class="w-4 h-4 text-cyan-400"></i>
+              <span>KHÁM PHÁ CẤU TRÚC BÓC TÁCH</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SITE FOOTER (Full 35 Pages Directory & Legal) -->
+    <footer
+      class="relative z-20 py-20 px-6 border-t border-white/10 bg-[#07070a]/95 text-xs text-slate-400 font-mono"
+    >
+      <div
+        class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-8 mb-16"
+      >
+        <!-- Col 1: Brand -->
+        <div class="col-span-2">
+          <div
+            class="flex items-center space-x-2 text-white font-heading font-bold text-base mb-4"
+          >
+            <i data-lucide="activity" class="w-5 h-5 text-cyan-400"></i>
+            <span>AURA ACOUSTICS LABS</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed max-w-sm mb-6">
+            Nền tảng âm thanh không gian thế hệ mới kết hợp kỹ thuật chế tác cơ
+            khí Magie siêu nhẹ và công nghệ bọc buồng âm Beryllium 40mm.
+          </p>
+          <div class="text-[11px] text-slate-500">
+            Trụ sở thiết kế âm học: Tokyo • San Francisco • TP. Hồ Chí Minh
+          </div>
+        </div>
+
+        <!-- Col 2: Sản Phẩm -->
+        <div class="space-y-2.5">
+          <div class="text-white font-bold tracking-wider uppercase mb-3">
+            Sản Phẩm
+          </div>
+          <div>
+            <a href="#/overview" class="hover:text-cyan-400 transition-colors"
+              >Tổng quan AURA ONE</a
+            >
+          </div>
+          <div>
+            <a href="#/anatomy" class="hover:text-cyan-400 transition-colors"
+              >Cấu tạo linh kiện 3D</a
+            >
+          </div>
+          <div>
+            <a
+              href="#/spatial-audio"
+              class="hover:text-cyan-400 transition-colors"
+              >Spatial Audio & EQ</a
+            >
+          </div>
+          <div>
+            <a href="#/anc" class="hover:text-cyan-400 transition-colors"
+              >Chống ồn Hybrid ANC</a
+            >
+          </div>
+          <div>
+            <a href="#/specs" class="hover:text-cyan-400 transition-colors"
+              >Thông số kỹ thuật</a
+            >
+          </div>
+          <div>
+            <a href="#/compare" class="hover:text-cyan-400 transition-colors"
+              >So sánh đối thủ</a
+            >
+          </div>
+          <div>
+            <a href="#/gallery" class="hover:text-cyan-400 transition-colors"
+              >Thư viện hình ảnh</a
+            >
+          </div>
+        </div>
+
+        <!-- Col 3: Mua Hàng & Studio -->
+        <div class="space-y-2.5">
+          <div class="text-white font-bold tracking-wider uppercase mb-3">
+            Mua Hàng
+          </div>
+          <div>
+            <a href="#/studio" class="hover:text-cyan-400 transition-colors"
+              >Color Studio 3D</a
+            >
+          </div>
+          <div>
+            <a href="#/engraving" class="hover:text-cyan-400 transition-colors"
+              >Khắc laser cá nhân</a
+            >
+          </div>
+          <div>
+            <a
+              href="#/accessories"
+              class="hover:text-cyan-400 transition-colors"
+              >Phụ kiện cao cấp</a
+            >
+          </div>
+          <div>
+            <a href="#/care-plus" class="hover:text-cyan-400 transition-colors"
+              >Bảo hiểm AURA Care+</a
+            >
+          </div>
+          <div>
+            <a href="#/checkout" class="hover:text-cyan-400 transition-colors"
+              >Đặt hàng trực tuyến</a
+            >
+          </div>
+        </div>
+
+        <!-- Col 4: Hậu Mãi & Dịch Vụ -->
+        <div class="space-y-2.5">
+          <div class="text-white font-bold tracking-wider uppercase mb-3">
+            Hậu Mãi & Hỗ Trợ
+          </div>
+          <div>
+            <a
+              href="#/order-tracking"
+              class="hover:text-cyan-400 transition-colors"
+              >Tra cứu đơn hàng</a
+            >
+          </div>
+          <div>
+            <a
+              href="#/digital-warranty"
+              class="hover:text-cyan-400 transition-colors"
+              >Tra cứu bảo hành số</a
+            >
+          </div>
+          <div>
+            <a href="#/register" class="hover:text-cyan-400 transition-colors"
+              >Kích hoạt sản phẩm</a
+            >
+          </div>
+          <div>
+            <a href="#/manual" class="hover:text-cyan-400 transition-colors"
+              >Sách hướng dẫn sử dụng</a
+            >
+          </div>
+          <div>
+            <a href="#/firmware" class="hover:text-cyan-400 transition-colors"
+              >Cập nhật Firmware OTA</a
+            >
+          </div>
+          <div>
+            <a href="#/faq" class="hover:text-cyan-400 transition-colors"
+              >Câu hỏi thường gặp FAQ</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Legal & Policies -->
+      <div
+        class="max-w-7xl mx-auto pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px]"
+      >
+        <div>© 2026 AURA ACOUSTICS LABS. TẤT CẢ QUYỀN ĐƯỢC BẢO LƯU.</div>
+        <div class="flex flex-wrap items-center gap-4">
+          <a href="#/warranty" class="hover:text-slate-200 transition-colors"
+            >Chính Sách Bảo Hành</a
+          >
+          <a href="#/shipping" class="hover:text-slate-200 transition-colors"
+            >Chính Sách Vận Chuyển</a
+          >
+          <a href="#/returns" class="hover:text-slate-200 transition-colors"
+            >Đổi Trả 30 Ngày</a
+          >
+          <a href="#/privacy" class="hover:text-slate-200 transition-colors"
+            >Quyền Riêng Tư</a
+          >
+          <a href="#/terms" class="hover:text-slate-200 transition-colors"
+            >Điều Khoản Dịch Vụ</a
+          >
+        </div>
+      </div>
+    </footer>
+
+    <!-- Floating Back to Top Button -->
+    <button
+      id="back-to-top-btn"
+      class="fixed bottom-6 left-6 z-40 w-11 h-11 rounded-full glass-panel border border-white/20 text-slate-300 hover:text-cyan-400 hover:border-cyan-400/50 flex items-center justify-center transition-all opacity-0 pointer-events-none shadow-2xl group"
+      title="Lên đầu trang"
+    >
+      <i
+        data-lucide="arrow-up"
+        class="w-4 h-4 group-hover:-translate-y-0.5 transition-transform"
+      ></i>
+    </button>
+
+    <!-- COMFORT SOUNDSCAPES MODAL (5 Relaxing Modes) -->
+    <div
+      id="comfort-sound-modal"
+      class="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300"
+    >
+      <div
+        class="glass-panel w-full max-w-lg rounded-3xl border border-cyan-500/30 p-6 sm:p-8 shadow-2xl space-y-6 relative max-h-[90vh] overflow-y-auto"
+      >
+        <!-- Close Button -->
+        <button
+          id="close-comfort-modal-btn"
+          class="absolute top-6 right-6 w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all"
+        >
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Modal Header -->
+        <div>
+          <div
+            class="inline-flex items-center space-x-2 px-3 py-1 rounded-full badge-dynamic text-xs font-mono mb-2"
+          >
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>AURA RELAXING AUDIO SUITE</span>
+          </div>
+          <h3 class="font-heading font-extrabold text-2xl text-white">
+            Âm Thanh & Nhạc Thư Giãn
+          </h3>
+          <p class="text-xs text-slate-300 mt-1">
+            Lựa chọn âm thanh thiên nhiên 48kHz hoặc các bản nhạc Lofi /
+            Acoustic không dính bản quyền từ YouTube.
+          </p>
+        </div>
+
+        <!-- Navigation Tabs: Nature vs Zing MP3 vs Royalty-Free YouTube -->
+
+        <!-- Master Sound Signature Card: Liêu Xiêu (Can You Stay) -->
+        <div
+          class="p-4 rounded-2xl bg-gradient-to-r from-cyan-950/50 via-black/80 to-purple-950/40 border border-cyan-400/40 relative overflow-hidden group shadow-lg shadow-cyan-500/10"
+        >
+          <div
+            class="absolute -right-8 -bottom-8 w-28 h-28 bg-cyan-400/10 rounded-full blur-2xl pointer-events-none"
+          ></div>
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10"
+          >
+            <div class="flex items-center space-x-3.5">
+              <div
+                class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-400 to-violet-600 p-0.5 flex-shrink-0 shadow-[0_0_15px_rgba(0,242,254,0.3)]"
+              >
+                <div
+                  class="w-full h-full bg-black rounded-2xl flex items-center justify-center text-cyan-300"
+                >
+                  <i data-lucide="headphones" class="w-6 h-6 animate-pulse"></i>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center space-x-2">
+                  <span
+                    class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-cyan-400 text-black"
+                    >AURA MASTER TRACK</span
+                  >
+                  <span class="text-[10px] font-mono text-cyan-300"
+                    >STUDIO MASTERING</span
+                  >
+                </div>
+                <h4 class="text-sm font-extrabold text-white mt-0.5">
+                  Liêu Xiêu (Can You Stay)
+                </h4>
+                <p class="text-xs text-slate-300">
+                  Âm thanh Không Gian 8D • R&B Chill mượt mà, Bass siêu trầm
+                </p>
+              </div>
+            </div>
+
+            <button
+              id="master-audio-play-btn"
+              class="px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-extrabold text-xs font-mono transition-all flex items-center justify-center space-x-2 shadow-lg shadow-cyan-400/25 flex-shrink-0 self-start sm:self-auto"
+            >
+              <i
+                data-lucide="play"
+                id="master-audio-play-icon"
+                class="w-4 h-4 fill-current"
+              ></i>
+              <span id="master-audio-play-text">PHÁT BÀI NÀY</span>
+            </button>
+          </div>
+
+          <!-- Seeker progress bar -->
+          <div
+            class="mt-3 pt-3 border-t border-white/10 flex items-center space-x-3 text-[10px] font-mono text-slate-400"
+          >
+            <span id="master-audio-curr-time">0:00</span>
+            <input
+              type="range"
+              id="master-audio-seeker"
+              min="0"
+              max="100"
+              value="0"
+              class="flex-1 accent-cyan-400 cursor-pointer h-1"
+            />
+            <span id="master-audio-duration">2:53</span>
+          </div>
+        </div>
+
+        <div
+          class="flex items-center space-x-1.5 p-1 rounded-2xl bg-white/5 border border-white/10 text-xs font-mono"
+        >
+          <button
+            id="tab-btn-nature"
+            class="flex-1 py-2 px-2 rounded-xl bg-cyan-400 text-black font-bold transition-all flex items-center justify-center space-x-1 active-tab text-[11px] sm:text-xs"
+          >
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 flex-shrink-0"></i>
+            <span class="truncate">Tự Nhiên</span>
+          </button>
+          <button
+            id="tab-btn-zingmp3"
+            class="flex-1 py-2 px-2 rounded-xl text-slate-300 hover:text-white transition-all flex items-center justify-center space-x-1 text-[11px] sm:text-xs"
+          >
+            <i
+              data-lucide="music-2"
+              class="w-3.5 h-3.5 text-violet-400 flex-shrink-0"
+            ></i>
+            <span class="truncate">Zing MP3</span>
+          </button>
+          <button
+            id="tab-btn-royalty"
+            class="flex-1 py-2 px-2 rounded-xl text-slate-300 hover:text-white transition-all flex items-center justify-center space-x-1 text-[11px] sm:text-xs"
+          >
+            <i
+              data-lucide="youtube"
+              class="w-3.5 h-3.5 text-rose-400 flex-shrink-0"
+            ></i>
+            <span class="truncate">YouTube CC</span>
+          </button>
+        </div>
+
+        <!-- 5 Soundscape Cards (Gentle & Soothing) -->
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 gap-3"
+          id="soundscape-cards-grid"
+        >
+          <!-- Rain -->
+          <button
+            class="soundscape-card p-4 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-cyan-400/50 text-left transition-all group flex flex-col justify-between"
+            data-sound="rain"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-2xl">🌧️</span>
+              <span
+                class="soundscape-badge px-2 py-0.5 rounded-full text-[9px] font-mono bg-white/5 text-slate-400"
+                >OFF</span
+              >
+            </div>
+            <div>
+              <div
+                class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors"
+              >
+                Mưa Phùn Mùa Xuân
+              </div>
+              <div class="text-[11px] text-slate-400 leading-snug mt-0.5">
+                Tiếng mưa rơi nhẹ nhàng mờ ảo bên khung cửa sổ, êm ái xoa dịu
+                tâm trí.
+              </div>
+            </div>
+          </button>
+
+          <!-- Ocean -->
+          <button
+            class="soundscape-card p-4 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-cyan-400/50 text-left transition-all group flex flex-col justify-between"
+            data-sound="ocean"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-2xl">🌊</span>
+              <span
+                class="soundscape-badge px-2 py-0.5 rounded-full text-[9px] font-mono bg-white/5 text-slate-400"
+                >OFF</span
+              >
+            </div>
+            <div>
+              <div
+                class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors"
+              >
+                Sóng Biển Hoàng Hôn
+              </div>
+              <div class="text-[11px] text-slate-400 leading-snug mt-0.5">
+                Nhịp thở đại dương sâu lắng 12 giây đưa cơ thể vào trạng thái
+                thư thái sâu.
+              </div>
+            </div>
+          </button>
+
+          <!-- Forest Breeze -->
+          <button
+            class="soundscape-card p-4 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-cyan-400/50 text-left transition-all group flex flex-col justify-between"
+            data-sound="fire"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-2xl">🍃</span>
+              <span
+                class="soundscape-badge px-2 py-0.5 rounded-full text-[9px] font-mono bg-white/5 text-slate-400"
+                >OFF</span
+              >
+            </div>
+            <div>
+              <div
+                class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors"
+              >
+                Gió Thoảng Rừng Thông
+              </div>
+              <div class="text-[11px] text-slate-400 leading-snug mt-0.5">
+                Gió mơn man lá thông và hơi ấm tĩnh lặng của tự nhiên không chút
+                ồn ào.
+              </div>
+            </div>
+          </button>
+
+          <!-- Theta 432Hz Zen Bowl -->
+          <button
+            class="soundscape-card p-4 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-cyan-400/50 text-left transition-all group flex flex-col justify-between"
+            data-sound="theta"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-2xl">🧘</span>
+              <span
+                class="soundscape-badge px-2 py-0.5 rounded-full text-[9px] font-mono bg-white/5 text-slate-400"
+                >OFF</span
+              >
+            </div>
+            <div>
+              <div
+                class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors"
+              >
+                Chuông Thiền 432Hz
+              </div>
+              <div class="text-[11px] text-slate-400 leading-snug mt-0.5">
+                Chuông xoay Tây Tạng và sóng não Theta 432Hz giải phóng hoàn
+                toàn mệt mỏi.
+              </div>
+            </div>
+          </button>
+
+          <!-- Cloud Pad -->
+          <button
+            class="soundscape-card sm:col-span-2 p-4 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-cyan-400/50 text-left transition-all group flex items-center justify-between"
+            data-sound="cosmic"
+          >
+            <div class="flex items-center space-x-3">
+              <span class="text-2xl">☁️</span>
+              <div>
+                <div
+                  class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors"
+                >
+                  Mây Bồng Bềnh (Silk Cloud Ambient)
+                </div>
+                <div class="text-[11px] text-slate-400">
+                  Hợp âm Fmaj9 êm ái như dải lụa đưa tâm trí lơ lửng giữa biển
+                  mây.
+                </div>
+              </div>
+            </div>
+            <span
+              class="soundscape-badge px-2 py-0.5 rounded-full text-[9px] font-mono bg-white/5 text-slate-400"
+              >OFF</span
+            >
+          </button>
+        </div>
+
+        <!-- Tab 2 Content: Zing MP3 Trending Tracks & Direct Embed -->
+        <div id="tab-content-zingmp3" class="space-y-4 hidden">
+          <div
+            class="p-3.5 rounded-2xl bg-violet-500/10 border border-violet-500/20 text-xs text-slate-200 flex items-start space-x-3"
+          >
+            <i
+              data-lucide="sparkles"
+              class="w-5 h-5 text-violet-400 flex-shrink-0 mt-0.5"
+            ></i>
+            <div class="leading-relaxed">
+              <span class="font-bold text-violet-300">Zing MP3 Stream:</span>
+              Trải nghiệm âm thanh chất lượng cao từ Zing MP3. Phát bài hát được
+              đề xuất hoặc dán bất kỳ link Zing MP3 nào bạn muốn thưởng thức
+              cùng hiệu ứng âm thanh không gian AURA ONE!
+            </div>
+          </div>
+
+          <!-- Featured Zing MP3 Song: moianh - IZARA -->
+          <div
+            class="p-4 rounded-2xl bg-gradient-to-r from-violet-950/40 via-purple-900/20 to-cyan-950/30 border border-violet-500/30 relative overflow-hidden group"
+          >
+            <div
+              class="absolute -right-10 -bottom-10 w-32 h-32 bg-violet-500/10 rounded-full blur-2xl pointer-events-none"
+            ></div>
+            <div
+              class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10"
+            >
+              <div class="flex items-center space-x-3.5">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-violet-500/20 border border-violet-400/30 text-violet-300 flex items-center justify-center font-bold text-lg shadow-lg shadow-violet-500/10 flex-shrink-0"
+                >
+                  <i
+                    data-lucide="disc"
+                    class="w-6 h-6 animate-[spin_8s_linear_infinite]"
+                  ></i>
+                </div>
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <span
+                      class="px-2 py-0.5 rounded-full text-[9px] font-mono bg-violet-500/20 text-violet-300 font-bold border border-violet-500/30"
+                      >TRENDING</span
+                    >
+                    <span class="text-[10px] font-mono text-cyan-400"
+                      >HOT RECOMMENDATION</span
+                    >
+                  </div>
+                  <h4
+                    class="text-sm sm:text-base font-extrabold text-white mt-0.5 group-hover:text-violet-300 transition-colors"
+                  >
+                    moianh (mời anh)
+                  </h4>
+                  <p class="text-xs text-slate-300">
+                    Ca sĩ:
+                    <span class="text-white font-medium"
+                      >IZARA (Hoàng Thiên Nga)</span
+                    >
+                    • Giai điệu Pop Chill thư thái
+                  </p>
+                </div>
+              </div>
+              <button
+                id="play-moianh-btn"
+                class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 hover:from-violet-400 hover:to-cyan-300 text-black font-extrabold text-xs font-mono transition-all shadow-lg shadow-violet-500/20 flex items-center justify-center space-x-2 self-start sm:self-auto"
+                data-song-id="IE7z14xoLkqs"
+                data-song-title="moianh - IZARA"
+              >
+                <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                <span id="play-moianh-text">PHÁT BÀI NÀY</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Custom Zing MP3 Link Input -->
+          <div
+            class="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2.5"
+          >
+            <div
+              class="text-[11px] font-mono text-slate-300 flex items-center justify-between"
+            >
+              <span>DÁN LINK ZING MP3 BẤT KỲ ĐỂ PHÁT:</span>
+              <i data-lucide="link" class="w-3.5 h-3.5 text-violet-400"></i>
+            </div>
+            <div class="flex items-center space-x-2">
+              <input
+                type="text"
+                id="custom-zing-input"
+                placeholder="https://zingmp3.vn/bai-hat/moianh-IZARA/IE7z14xoLkqs.html"
+                class="flex-1 px-3.5 py-2 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-violet-400 font-mono"
+              />
+              <button
+                id="custom-zing-play-btn"
+                class="px-4 py-2 rounded-xl bg-violet-500 hover:bg-violet-400 text-white font-bold text-xs font-mono transition-all"
+              >
+                PHÁT
+              </button>
+            </div>
+          </div>
+
+          <!-- Embedded Zing MP3 Player Container -->
+          <div
+            id="zing-player-container"
+            class="rounded-2xl overflow-hidden border border-violet-500/30 bg-black/80 hidden relative p-2 shadow-2xl"
+          >
+            <div
+              class="flex items-center justify-between px-2 py-1 mb-1 text-[10px] font-mono text-slate-400"
+            >
+              <div
+                class="flex items-center space-x-1.5 text-violet-300 font-bold"
+              >
+                <span
+                  class="w-2 h-2 rounded-full bg-violet-400 animate-pulse"
+                ></span>
+                <span id="zing-current-title">ĐANG PHÁT TỪ ZING MP3</span>
+              </div>
+              <button
+                id="zing-close-btn"
+                class="text-slate-400 hover:text-white transition-colors"
+              >
+                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+            <iframe
+              id="zing-player-iframe"
+              width="100%"
+              height="95"
+              src=""
+              frameborder="0"
+              allowfullscreen="true"
+              class="rounded-xl"
+            ></iframe>
+          </div>
+        </div>
+
+        <!-- Tab 3 Content: Royalty-Free Music & YouTube Stream -->
+        <div id="tab-content-royalty" class="space-y-4 hidden">
+          <div
+            class="p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-xs text-slate-200 flex items-start space-x-3"
+          >
+            <i
+              data-lucide="shield-check"
+              class="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5"
+            ></i>
+            <div class="leading-relaxed">
+              <span class="font-bold text-cyan-300"
+                >Nguồn Âm Thanh Miễn Phí Bản Quyền 100%:</span
+              >
+              Được tuyển chọn từ YouTube Audio Library & Giấy phép Creative
+              Commons (CC-BY). An toàn tuyệt đối, không lo bị đánh bản quyền khi
+              livestream hay chia sẻ mạng xã hội.
+            </div>
+          </div>
+
+          <!-- Curated Royalty-Free YouTube Streams -->
+          <div class="space-y-2">
+            <!-- Track 1: Lofi Hip Hop / Chill Study -->
+            <button
+              class="rf-track-btn w-full p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-cyan-400/50 text-left transition-all flex items-center justify-between group"
+              data-yt-id="jfKfPfyJRdk"
+              data-title="Lofi Chill Beats • Thư Giãn & Tập Trung"
+            >
+              <div class="flex items-center space-x-3">
+                <div
+                  class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-sm"
+                >
+                  <i data-lucide="music" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div
+                    class="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors"
+                  >
+                    Lofi Chill Beats • Thư Giãn & Tập Trung
+                  </div>
+                  <div class="text-[10px] text-slate-400">
+                    YouTube Audio Library / Lofi Girl CC • Không dính bản quyền
+                  </div>
+                </div>
+              </div>
+              <span
+                class="px-2 py-0.5 rounded-full text-[9px] font-mono bg-white/5 text-slate-400 rf-badge"
+                >PHÁT</span
+              >
+            </button>
+
+            <!-- Track 2: Acoustic Morning Coffee -->
+            <button
+              class="rf-track-btn w-full p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-cyan-400/50 text-left transition-all flex items-center justify-between group"
+              data-yt-id="5yx6BWlEVcY"
+              data-title="Acoustic Guitar Mộc Mạc • Nắng Sớm"
+            >
+              <div class="flex items-center space-x-3">
+                <div
+                  class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm"
+                >
+                  <i data-lucide="music" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div
+                    class="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors"
+                  >
+                    Acoustic Guitar Mộc Mạc • Nắng Sớm Bình Yên
+                  </div>
+                  <div class="text-[10px] text-slate-400">
+                    Guitar gỗ êm ái • Giấy phép CC0 Miễn phí bản quyền
+                  </div>
+                </div>
+              </div>
+              <span
+                class="px-2 py-0.5 rounded-full text-[9px] font-mono bg-white/5 text-slate-400 rf-badge"
+                >PHÁT</span
+              >
+            </button>
+
+            <!-- Track 3: 432Hz Deep Sleep Meditation -->
+            <button
+              class="rf-track-btn w-full p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-cyan-400/50 text-left transition-all flex items-center justify-between group"
+              data-yt-id="1ZYbU8csArM"
+              data-title="Thiền Định Sâu 432Hz • Giấc Ngủ Bình Yên"
+            >
+              <div class="flex items-center space-x-3">
+                <div
+                  class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-sm"
+                >
+                  <i data-lucide="music" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div
+                    class="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors"
+                  >
+                    Thiền Định Sâu 432Hz • Giấc Ngủ Bình Yên
+                  </div>
+                  <div class="text-[10px] text-slate-400">
+                    Tần số chữa lành tinh thần • YouTube Creative Commons
+                  </div>
+                </div>
+              </div>
+              <span
+                class="px-2 py-0.5 rounded-full text-[9px] font-mono bg-white/5 text-slate-400 rf-badge"
+                >PHÁT</span
+              >
+            </button>
+          </div>
+
+          <!-- Custom YouTube Link Input -->
+          <div
+            class="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2.5"
+          >
+            <div
+              class="text-[11px] font-mono text-slate-300 flex items-center justify-between"
+            >
+              <span>DÁN LINK YOUTUBE BẤT KỲ ĐỂ PHÁT TRONG NỀN:</span>
+              <i data-lucide="link" class="w-3.5 h-3.5 text-cyan-400"></i>
+            </div>
+            <div class="flex items-center space-x-2">
+              <input
+                type="text"
+                id="custom-yt-input"
+                placeholder="https://www.youtube.com/watch?v=..."
+                class="flex-1 px-3.5 py-2 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono"
+              />
+              <button
+                id="custom-yt-play-btn"
+                class="px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-bold text-xs font-mono transition-all"
+              >
+                PHÁT
+              </button>
+            </div>
+          </div>
+
+          <!-- Hidden / Mini YouTube Player Container -->
+          <div
+            id="yt-player-container"
+            class="rounded-2xl overflow-hidden border border-white/10 bg-black aspect-video hidden relative"
+          >
+            <iframe
+              id="yt-player-iframe"
+              width="100%"
+              height="100%"
+              src=""
+              frameborder="0"
+              allow="
+                accelerometer;
+                autoplay;
+                clipboard-write;
+                encrypted-media;
+                gyroscope;
+                picture-in-picture;
+              "
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+
+        <!-- Volume & Stop Control Bar -->
+        <div
+          class="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4"
+        >
+          <div class="flex items-center space-x-3 w-full sm:w-auto">
+            <i data-lucide="volume-2" class="w-4 h-4 text-cyan-400"></i>
+            <span class="text-xs font-mono text-slate-300">Âm Lượng:</span>
+            <input
+              type="range"
+              id="soundscape-volume"
+              min="0"
+              max="100"
+              value="40"
+              class="w-32 accent-cyan-400 cursor-pointer"
+            />
+            <span
+              id="soundscape-vol-val"
+              class="text-xs font-mono text-cyan-400"
+              >40%</span
+            >
+          </div>
+          <button
+            id="soundscape-stop-btn"
+            class="px-5 py-2 rounded-xl bg-white/10 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 text-xs font-mono flex items-center space-x-2 transition-all"
+          >
+            <i data-lucide="square" class="w-3.5 h-3.5"></i>
+            <span>DỪNG ÂM THANH</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- PRODUCT QUICK-VIEW & DETAIL MODAL -->
+    <!-- ======================================================== -->
+    <div
+      id="product-quickview-modal"
+      class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden flex items-center justify-center p-3 sm:p-6 transition-all duration-300"
+    >
+      <div
+        class="max-w-4xl w-full glass-panel rounded-3xl border border-white/20 relative shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[92vh] bg-[#090a10]"
+      >
+        <button
+          id="close-quickview-btn"
+          class="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-all"
+        >
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Left: High-Res Image Display & Sound Signature Wave -->
+        <div
+          class="w-full md:w-1/2 p-6 flex flex-col justify-between items-center bg-gradient-to-b from-white/[0.04] to-black/70 border-b md:border-b-0 md:border-r border-white/10 relative"
+        >
+          <div class="w-full flex items-center justify-between">
+            <span
+              id="qv-badge"
+              class="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-400/30"
+              >FLAGSHIP</span
+            >
+            <button
+              id="qv-wishlist-toggle-btn"
+              class="p-2 rounded-full bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-white/10 transition-all"
+              title="Lưu vào danh sách yêu thích"
+            >
+              <i data-lucide="heart" id="qv-wishlist-icon" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <div
+            class="my-6 relative w-full flex items-center justify-center group"
+          >
+            <div
+              class="absolute inset-0 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"
+            ></div>
+            <img
+              id="qv-image"
+              src="assets/media/hero-titanium-studio.png"
+              alt="AURA Product"
+              class="max-h-64 object-contain filter drop-shadow-[0_12px_24px_rgba(0,242,254,0.3)] transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+
+          <!-- Audio Frequency & Sound Signature Preview -->
+          <div
+            class="w-full p-3 rounded-2xl bg-black/60 border border-white/10 space-y-1.5"
+          >
+            <div
+              class="flex items-center justify-between text-[10px] font-mono"
+            >
+              <span class="text-cyan-400 font-bold flex items-center gap-1"
+                ><i data-lucide="activity" class="w-3 h-3"></i> TẦN SỐ ÂM
+                HỌC</span
+              >
+              <span class="text-slate-400">4Hz – 52,000Hz (Hi-Res Gold)</span>
+            </div>
+            <div
+              class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden flex"
+            >
+              <div class="bg-cyan-400 h-full w-[35%] animate-pulse"></div>
+              <div class="bg-purple-500 h-full w-[40%]"></div>
+              <div class="bg-amber-400 h-full w-[25%]"></div>
+            </div>
+            <div
+              class="flex justify-between text-[9px] font-mono text-slate-500"
+            >
+              <span>Sub-Bass: +4.2dB</span>
+              <span>Mastering Mid: Tuyệt đối phẳng</span>
+              <span>Air Treble: Cực đại</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Product Specs, Custom Engraving & Actions -->
+        <div
+          class="w-full md:w-1/2 p-6 flex flex-col justify-between overflow-y-auto space-y-4"
+        >
+          <div>
+            <div
+              class="flex items-center space-x-2 text-[11px] font-mono text-amber-400 mb-1"
+            >
+              <span id="qv-stars">★★★★★</span>
+              <span id="qv-rating-text" class="text-slate-400"
+                >5.0 (248 đánh giá chuyên gia)</span
+              >
+            </div>
+            <h3
+              id="qv-title"
+              class="font-heading text-2xl font-black text-white leading-tight"
+            >
+              AURA ONE Titanium Graphite Studio
+            </h3>
+            <p id="qv-desc" class="text-xs text-slate-300 mt-2 leading-relaxed">
+              Hợp kim Magie hàng không 238g, màng loa Beryllium nguyên chất
+              12.890 m/s, âm trường chuẩn mastering Abbey Road.
+            </p>
+          </div>
+
+          <!-- Specs Badge Grid -->
+          <div class="grid grid-cols-2 gap-2 text-[10px] font-mono">
+            <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
+              <span class="text-slate-400 block">Màng Loa:</span>
+              <span class="text-white font-bold">40mm Pure Beryllium</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
+              <span class="text-slate-400 block">Thời Lượng Pin:</span>
+              <span class="text-cyan-300 font-bold"
+                >60 Giờ (Sạc 15p nghe 8h)</span
+              >
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
+              <span class="text-slate-400 block">Trọng Lượng:</span>
+              <span class="text-white font-bold">238g Siêu nhẹ</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
+              <span class="text-slate-400 block">Kết Nối Hi-Res:</span>
+              <span class="text-emerald-300 font-bold"
+                >LDAC / 4.4mm Balanced</span
+              >
+            </div>
+          </div>
+
+          <!-- Custom Laser Engraving (Khắc tên 3D) -->
+          <div
+            class="p-3 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1.5"
+          >
+            <label
+              class="text-[10px] font-mono text-cyan-300 font-semibold flex items-center justify-between"
+            >
+              <span class="flex items-center gap-1"
+                ><i data-lucide="sparkles" class="w-3 h-3 text-cyan-400"></i>
+                KHẮC TÊN LASER 3D (MIỄN PHÍ):</span
+              >
+              <span class="text-[9px] text-slate-400">Tối đa 18 ký tự</span>
+            </label>
+            <div class="flex items-center space-x-2">
+              <input
+                type="text"
+                id="qv-engraving-input"
+                maxlength="18"
+                placeholder="VD: NGUYEN HOANG NAM"
+                class="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/20 focus:border-cyan-400 focus:outline-none text-xs text-white font-mono uppercase"
+              />
+              <div
+                id="qv-engraving-preview-badge"
+                class="px-2.5 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-400/40 text-[10px] font-mono text-cyan-300 whitespace-nowrap"
+              >
+                AURA
+              </div>
+            </div>
+          </div>
+
+          <!-- Price, Quantity & CTA -->
+          <div class="pt-3 border-t border-white/10 space-y-3">
+            <div class="flex items-baseline justify-between font-mono">
+              <div>
+                <span id="qv-price-usd" class="text-2xl font-black text-white"
+                  >399 USD</span
+                >
+                <span id="qv-price-vnd" class="text-xs text-slate-400 block"
+                  >~ 9.990.000 đ</span
+                >
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs text-slate-400">Số lượng:</span>
+                <div
+                  class="flex items-center space-x-1.5 bg-black/60 p-1 rounded-xl border border-white/15"
+                >
+                  <button
+                    id="qv-qty-minus"
+                    class="w-6 h-6 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold text-xs"
+                  >
+                    -
+                  </button>
+                  <span
+                    id="qv-qty-val"
+                    class="w-7 text-center font-bold text-xs text-white font-mono"
+                    >1</span
+                  >
+                  <button
+                    id="qv-qty-plus"
+                    class="w-6 h-6 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold text-xs"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                id="qv-add-to-cart-btn"
+                class="py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-bold transition-all flex items-center justify-center space-x-2 border border-white/15"
+              >
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>+ GIỎ HÀNG</span>
+              </button>
+              <button
+                id="qv-buy-now-btn"
+                class="py-3 px-4 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-mono text-xs font-black transition-all flex items-center justify-center space-x-2 shadow-lg shadow-cyan-400/25"
+              >
+                <span>MUA NGAY</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <!-- Trust Badges -->
+            <div
+              class="flex items-center justify-center space-x-4 text-[9px] font-mono text-slate-400 pt-1"
+            >
+              <span class="flex items-center gap-1"
+                ><i
+                  data-lucide="shield-check"
+                  class="w-3 h-3 text-emerald-400"
+                ></i>
+                Bảo hành 3 năm 1-đổi-1</span
+              >
+              <span class="flex items-center gap-1"
+                ><i data-lucide="truck" class="w-3 h-3 text-cyan-400"></i> Hỏa
+                tốc 2H VIP</span
+              >
+              <span class="flex items-center gap-1"
+                ><i data-lucide="lock" class="w-3 h-3 text-amber-400"></i> SSL
+                256-Bit</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- WISHLIST MODAL (DANH SÁCH YÊU THÍCH) -->
+    <!-- ======================================================== -->
+    <div
+      id="wishlist-modal"
+      class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden flex items-center justify-center p-4 transition-all duration-300"
+    >
+      <div
+        class="max-w-2xl w-full glass-panel rounded-3xl border border-white/20 relative shadow-2xl overflow-hidden flex flex-col max-h-[85vh] bg-[#090a10]"
+      >
+        <div
+          class="p-6 border-b border-white/10 flex items-center justify-between"
+        >
+          <div class="flex items-center space-x-3">
+            <div
+              class="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400"
+            >
+              <i data-lucide="heart" class="w-5 h-5 fill-current"></i>
+            </div>
+            <div>
+              <h3 class="font-heading font-black text-xl text-white">
+                Danh Sách Sản Phẩm Yêu Thích
+              </h3>
+              <p class="text-xs text-slate-400 font-mono">
+                Các siêu phẩm AURA ONE bạn đã lưu tâm
+              </p>
+            </div>
+          </div>
+          <button
+            id="close-wishlist-btn"
+            class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-all"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div
+          id="wishlist-items-container"
+          class="p-6 space-y-3 overflow-y-auto flex-1"
+        >
+          <!-- Rendered dynamically -->
+        </div>
+
+        <div
+          class="p-5 border-t border-white/10 bg-white/[0.02] flex items-center justify-between"
+        >
+          <button
+            id="wishlist-add-all-btn"
+            class="px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-mono font-bold text-xs uppercase transition-all shadow-md shadow-cyan-400/20"
+          >
+            THÊM TẤT CẢ VÀO GIỎ HÀNG
+          </button>
+          <button
+            id="wishlist-clear-btn"
+            class="text-xs font-mono text-slate-400 hover:text-rose-400 transition-colors"
+          >
+            Xóa tất cả
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- DIGITAL WARRANTY LOOKUP MODAL -->
+    <!-- ======================================================== -->
+    <div
+      id="warranty-modal"
+      class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden flex items-center justify-center p-4 transition-all duration-300"
+    >
+      <div
+        class="max-w-xl w-full glass-panel rounded-3xl border border-white/20 relative shadow-2xl overflow-hidden flex flex-col max-h-[85vh] bg-[#090a10]"
+      >
+        <div
+          class="p-6 border-b border-white/10 flex items-center justify-between"
+        >
+          <div class="flex items-center space-x-3">
+            <div
+              class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400"
+            >
+              <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-heading font-black text-xl text-white">
+                Tra Cứu Bảo Hành Điện Tử 3 Năm
+              </h3>
+              <p class="text-xs text-slate-400 font-mono">
+                Xác thực mã định danh & bảo hộ chính hãng AURA VIP
+              </p>
+            </div>
+          </div>
+          <button
+            id="close-warranty-btn"
+            class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-all"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <div class="flex space-x-2">
+            <input
+              type="text"
+              id="warranty-lookup-input"
+              placeholder="Nhập Số Serial (VD: AO-3D-2026-9821) hoặc Mã Đơn Hàng"
+              class="flex-1 px-4 py-3 rounded-xl bg-black/60 border border-white/20 focus:border-cyan-400 focus:outline-none text-xs text-white font-mono uppercase"
+            />
+            <button
+              id="warranty-search-btn"
+              class="px-5 py-3 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-black font-mono font-bold text-xs uppercase transition-all shadow-md shadow-emerald-400/20"
+            >
+              TRA CỨU
+            </button>
+          </div>
+
+          <div
+            id="warranty-result-box"
+            class="hidden p-5 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 space-y-3 font-mono"
+          >
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- ADD CUSTOMER REVIEW MODAL -->
+    <!-- ======================================================== -->
+    <div
+      id="add-review-modal"
+      class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden flex items-center justify-center p-4 transition-all duration-300"
+    >
+      <div
+        class="max-w-md w-full glass-panel rounded-3xl border border-cyan-500/30 relative shadow-2xl overflow-hidden flex flex-col bg-[#090a10]"
+      >
+        <div
+          class="p-5 border-b border-white/10 flex items-center justify-between"
+        >
+          <div class="flex items-center space-x-2.5">
+            <div
+              class="w-8 h-8 rounded-xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400"
+            >
+              <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+            </div>
+            <div>
+              <h3 class="font-heading font-bold text-base text-white">
+                Gửi Đánh Giá Trải Nghiệm
+              </h3>
+              <p class="text-[10px] text-slate-400 font-mono">
+                Đóng góp ý kiến âm học cho AURA Labs
+              </p>
+            </div>
+          </div>
+          <button
+            id="close-review-modal-btn"
+            class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-all"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <form
+          id="add-review-form"
+          class="p-5 space-y-3.5 text-xs font-mono"
+          onsubmit="return false;"
+        >
+          <div>
+            <label class="block text-slate-300 mb-1"
+              >CHỌN SẢN PHẨM ĐÁNH GIÁ</label
+            >
+            <select
+              id="review-prod-select"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white focus:border-cyan-400 focus:outline-none"
+            >
+              <option value="prod-titanium">
+                AURA ONE Titanium Graphite Studio ($399)
+              </option>
+              <option value="prod-gold">
+                AURA ONE 24K Luxury Gold & Obsidian ($449)
+              </option>
+              <option value="prod-cyan">
+                AURA ONE Electric Cyan 8D Master ($429)
+              </option>
+              <option value="prod-copper">
+                AURA ONE Bespoke Warm Amber Copper ($399)
+              </option>
+              <option value="prod-pearl">
+                AURA ONE Pearl Minimalist White ($399)
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-slate-300 mb-1"
+              >ĐÁNH GIÁ CHẤT ÂM (RATING)</label
+            >
+            <div
+              class="flex items-center space-x-2 text-amber-400 text-lg cursor-pointer select-none"
+              id="review-star-picker"
+            >
+              <span
+                class="star-btn hover:scale-125 transition-transform"
+                data-star="1"
+                >★</span
+              >
+              <span
+                class="star-btn hover:scale-125 transition-transform"
+                data-star="2"
+                >★</span
+              >
+              <span
+                class="star-btn hover:scale-125 transition-transform"
+                data-star="3"
+                >★</span
+              >
+              <span
+                class="star-btn hover:scale-125 transition-transform"
+                data-star="4"
+                >★</span
+              >
+              <span
+                class="star-btn hover:scale-125 transition-transform"
+                data-star="5"
+                >★</span
+              >
+              <span
+                id="review-star-label"
+                class="text-xs font-bold text-slate-300 ml-2 font-mono"
+                >5.0 / 5.0 (Xuất sắc)</span
+              >
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-slate-300 mb-1"
+              >HỌ VÀ TÊN HOẶC NGHỆ DANH *</label
+            >
+            <input
+              type="text"
+              id="review-author"
+              placeholder="VD: Hoàng Tuấn Anh"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white focus:border-cyan-400 focus:outline-none"
+              required
+            />
+          </div>
+
+          <div>
+            <label class="block text-slate-300 mb-1"
+              >CHỨC DANH / VAI TRÒ ÂM NHẠC</label
+            >
+            <input
+              type="text"
+              id="review-title"
+              placeholder="VD: Kỹ sư âm thanh / Nhạc sĩ / Audiophile"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white focus:border-cyan-400 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label class="block text-slate-300 mb-1"
+              >CẢM NHẬN CHI TIẾT VỀ CHẤT ÂM & THIẾT KẾ *</label
+            >
+            <textarea
+              id="review-comment"
+              rows="3"
+              placeholder="Chia sẻ cảm nhận về dải bass, treble, độ thoải mái khi đeo hoặc âm trường không gian 8D..."
+              class="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white focus:border-cyan-400 focus:outline-none leading-relaxed"
+              required
+            ></textarea>
+          </div>
+
+          <button
+            type="submit"
+            id="submit-review-btn"
+            class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black font-extrabold text-xs tracking-wider uppercase transition-all shadow-lg shadow-cyan-400/25 flex items-center justify-center space-x-2"
+          >
+            <span>XÁC NHẬN GỬI ĐÁNH GIÁ</span>
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- PROJECT INTRO & INTERACTIVE TOUR MODAL     -->
+    <!-- ========================================== -->
+    <div
+      id="project-intro-modal"
+      class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300"
+    >
+      <div
+        class="glass-panel p-6 sm:p-8 rounded-3xl border border-cyan-400/40 max-w-2xl w-full relative shadow-[0_0_50px_rgba(0,242,254,0.25)] bg-gradient-to-b from-[#0c0e14] via-[#07070a] to-black max-h-[90vh] overflow-y-auto"
+      >
+        <button
+          id="close-intro-modal"
+          class="absolute top-5 right-5 text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-all"
+        >
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Header -->
+        <div class="text-center pb-6 border-b border-white/10">
+          <div
+            class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono mb-3"
+          >
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+            <span>AURA ONE 3D • MASTER DIGITAL EXPERIENCE</span>
+          </div>
+          <h2 class="font-heading text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Trang Web Này Là Gì?
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 mt-2 max-w-xl mx-auto leading-relaxed">
+            Đây là nền tảng thương mại điện tử công nghệ cao kết hợp <strong class="text-cyan-400">Đồ Họa 3D WebGL tương tác</strong> và <strong class="text-violet-400">Âm Thanh Không Gian 8D</strong> dành cho dòng tai nghe cao cấp AURA ONE.
+          </p>
+        </div>
+
+        <!-- 4 Quick Tour Highlights -->
+        <div class="py-6 space-y-4">
+          <h3 class="text-xs font-mono uppercase tracking-widest text-slate-400">
+            5 ĐIỂM NHẤN CÔNG NGHỆ BẠN NÊN TRẢI NGHIỆM NGAY:
+          </h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
+            <!-- Item 1 -->
+            <div class="p-4 rounded-2xl bg-white/[0.03] border border-cyan-400/30 hover:border-cyan-400 transition-all group cursor-pointer" onclick="window.location.hash='#/studio'; document.getElementById('project-intro-modal').classList.add('opacity-0','pointer-events-none');">
+              <div class="flex items-center space-x-2 text-cyan-400 font-bold mb-1">
+                <i data-lucide="palette" class="w-4 h-4"></i>
+                <span>1. Tùy Biến 3D Studio</span>
+              </div>
+              <p class="text-[11px] text-slate-300 leading-relaxed font-sans">
+                Xoay 360°, đổi 8 màu hoàn thiện và gõ tên để khắc laser 3D thời gian thực.
+              </p>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="p-4 rounded-2xl bg-white/[0.03] border border-violet-400/30 hover:border-violet-400 transition-all group cursor-pointer" onclick="window.location.hash='#/spatial-audio'; document.getElementById('project-intro-modal').classList.add('opacity-0','pointer-events-none');">
+              <div class="flex items-center space-x-2 text-violet-400 font-bold mb-1">
+                <i data-lucide="volume-2" class="w-4 h-4"></i>
+                <span>2. Âm Thanh 8D Spatial</span>
+              </div>
+              <p class="text-[11px] text-slate-300 leading-relaxed font-sans">
+                Bật dock nhạc bên dưới, tận hưởng trường âm xoay quanh đầu hoặc dán link Zing MP3.
+              </p>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="p-4 rounded-2xl bg-white/[0.03] border border-emerald-400/30 hover:border-emerald-400 transition-all group cursor-pointer" onclick="window.location.hash='#/anatomy'; document.getElementById('project-intro-modal').classList.add('opacity-0','pointer-events-none');">
+              <div class="flex items-center space-x-2 text-emerald-400 font-bold mb-1">
+                <i data-lucide="layers" class="w-4 h-4"></i>
+                <span>3. Bóc Tách Màng Loa 3D</span>
+              </div>
+              <p class="text-[11px] text-slate-300 leading-relaxed font-sans">
+                Xem cận cảnh 6 tầng cấu trúc màng loa 40mm Beryllium và buồng âm triệt tiêu sóng đứng.
+              </p>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="p-4 rounded-2xl bg-white/[0.03] border border-amber-400/30 hover:border-amber-400 transition-all group cursor-pointer" onclick="document.getElementById('header-concierge-btn')?.click(); document.getElementById('project-intro-modal').classList.add('opacity-0','pointer-events-none');">
+              <div class="flex items-center space-x-2 text-amber-400 font-bold mb-1">
+                <i data-lucide="bot" class="w-4 h-4"></i>
+                <span>4. Chuyên Gia AI Tư Vấn</span>
+              </div>
+              <p class="text-[11px] text-slate-300 leading-relaxed font-sans">
+                Hỏi đáp mọi thắc mắc âm học, phối nhạc theo gu và nhận mã giảm giá $50 độc quyền.
+              </p>
+            </div>
+          </div>
+
+          <!-- Bottom Feature: E-commerce & Security -->
+          <div class="p-3.5 rounded-2xl bg-cyan-950/20 border border-cyan-500/20 flex items-center justify-between text-xs font-mono">
+            <div class="flex items-center space-x-2 text-cyan-300">
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+              <span>Bảo mật chuẩn PCI-DSS • Chống can thiệp giá • VietQR 1 chạm</span>
+            </div>
+            <a href="#/dashboard" onclick="document.getElementById('project-intro-modal').classList.add('opacity-0','pointer-events-none');" class="text-white hover:text-cyan-300 underline font-bold">Xem Sanctuary VIP →</a>
+          </div>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <a
+            href="https://github.com/tinn2673-create"
+            target="_blank"
+            class="w-full sm:w-auto px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-mono text-xs font-semibold border border-white/15 transition-all flex items-center justify-center space-x-2"
+          >
+            <i data-lucide="github" class="w-4 h-4"></i>
+            <span>GITHUB CỦA TÁC GIẢ</span>
+          </a>
+
+          <button
+            id="start-tour-btn"
+            class="w-full sm:w-auto px-6 py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-mono text-xs font-bold transition-all shadow-lg shadow-cyan-400/25 flex items-center justify-center space-x-2"
+          >
+            <span>BẮT ĐẦU TRẢI NGHIỆM NGAY</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript Main Application -->
+    <script src="js/app.js"></script>
+
+    <script>
+      // Mobile Drawer Auto-Close on Navigation
+      document.querySelectorAll(".mobile-nav-link").forEach((link) => {
+        link.addEventListener("click", () => {
+          document
+            .getElementById("mobile-menu-drawer")
+            ?.classList.add("-translate-y-full");
+        });
+      });
+    </script>
+  </body>
+</html>

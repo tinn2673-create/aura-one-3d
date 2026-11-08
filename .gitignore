@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Temporary scratch & test scripts
+scratch/
+.system_generated/
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Environment variables
+.env
+.env.local
